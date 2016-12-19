@@ -1,0 +1,176 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <title>ToDoList vue.js</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+        }
+        
+        .wrap {
+            padding: 20px 0 0 40px;
+        }
+        
+        .lists {
+            margin-top: 30px;
+        }
+        
+        .lists li {
+            list-style: none;
+            padding: 5px 0 5px 20px;
+            width: 300px;
+            background: #eee;
+        }
+        
+        .lists li:not(:first-child) {
+            border-top: 1px solid #ddd;
+        }
+        
+        .lists li a {
+            position: relative;
+            display: -webkit-box;
+            display: -webkit-flex;
+            display: flex;
+            color: #333;
+            text-decoration: none;
+        }
+        
+        .lists a .txt-box,
+        .lists a .edit-box {
+            -webkit-box-flex: 1;
+            -webkit-flex: 1;
+            flex: 1;
+            width: 100%;
+            padding: 6px;
+            line-height: 20px;
+        }
+        
+        .lists a .edit-box {
+            display: none;
+            border: 1px solid #ddd;
+        }
+        
+        .lists a.show-edit .edit-box {
+            display: block;
+        }
+        
+        .lists a.show-edit .txt-box {
+            display: none;
+        }
+        
+        .lists a .close-icon {
+            display: none;
+            font-size: 14px;
+            font-style: normal;
+            position: absolute;
+            right: 15px;
+            top: 50%;
+            margin-top: -8px;
+        }
+        
+        .lists a:hover .close-icon {
+            display: block;
+        }
+    </style>
+</head>
+
+<body>
+    <div id="Wrap" class="wrap">
+        <input type="text" autofocus v-model="message" v-on:keyup.enter="addItem">
+        <div class="lists">
+            <ul>
+                <li v-for="(item,index) in items">
+                    <a href="javascript:;" class="item-box" v-bind:class="{ 'show-edit':index === isTrue}">
+                        <span class="txt-box" v-on:dblclick="editItem(index)">
+                           {{item.text}}
+                            <i class="close-icon" v-on:click="delItem(index)">X</i>
+                        </span>
+                        <input type="text" class="edit-box" autofocus v-model="item.text" v-on:keyup.enter="saveItem(index)" v-on:blur="saveItem(index)">
+                    </a>
+                </li>
+            </ul>
+        </div>
+    </div>
+    <script src="http://cdn.bootcss.com/vue/2.1.0/vue.js"></script>
+    <script>
+        var arr = [];
+        var text = null;
+        var len = localStorage.length;
+        var show_storage_items = {
+
+            get: function () {
+                for (var i = 0; i < len; i++) {
+                    arr.push({
+                        text: localStorage.getItem(localStorage.key(i))
+                    });
+                }
+                //console.log(localStorage.getItem(localStorage.key(0)));
+                //console.log(arr[0]);
+                return arr;
+            }
+        };
+        new Vue({
+            el: "#Wrap",
+            data: {
+                message: "",
+                isTrue: false,
+                items: show_storage_items.get()
+            },
+            methods: {
+                addItem: function () {
+                    var text = this.message.trim();
+                    if (text) {
+                        this.items.push({
+                            text: text
+                        });
+                        this.message = "";
+
+
+                        //数据存储到localstorage
+                        if (!window.localStorage) {
+                            return false;
+                        } else {
+                            localStorage.setItem(len, text);
+                            len++;
+                        }
+
+                    }
+                },
+                delItem: function (index) {
+                    this.items.splice(index, 1);
+
+                    //数据从localstorage中删除
+                    if (!window.localStorage) {
+                        return false;
+                    } else {
+                        var key = localStorage.key(index);
+                        localStorage.removeItem(key);
+                    }
+
+                },
+                editItem: function (index) {
+
+                    this.isTrue = index;
+
+                },
+                saveItem: function (index) {
+
+                    this.isTrue = false;
+
+                    //更改数据库中的值
+                    if (!window.localStorage) {
+                        return false;
+                    } else {
+                        localStorage.setItem(index, this.items[index].text);
+                    }
+
+                }
+            }
+        });
+    </script>
+</body>
+
+</html>
